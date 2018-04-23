@@ -6,7 +6,7 @@
  * http://720kb.github.io/angular-tooltips
  * 
  * MIT license
- * Tue Jun 20 2017
+ * Sun Apr 22 2018
  */
 /*global angular,window*/
 (function withAngular(angular, window) {
@@ -215,24 +215,24 @@
     throw new Error('You must provide a position');
   }
   , getSideClasses = function getSideClasses(sides) {
-    
+
     return sides.split(' ').map(function mapSideClasses(side) {
-      
+
       return '_' + side;
     }).join(' ');
   }
   , directions = ['_top', '_top _left', '_left', '_bottom _left', '_bottom', '_bottom _right', '_right', '_top _right']
   , smartPosition = function smartPosition(tipElement, tooltipElement, startSide) {
-    
+
     var directionsIndex = directions.indexOf(getSideClasses(startSide))
       , directionsLength = directions.length
       , directionsCount = 0;
-    
+
     for (; directionsCount < directionsLength && isOutOfPage(tipElement); directionsCount += 1) {
-      
+
       directionsIndex += 1;
       if (directionsIndex >= directions.length) {
-        
+
         directionsIndex = 0;
       }
       tooltipElement.removeClass('_top _left _bottom _right');
@@ -339,7 +339,7 @@
           , onTooltipShow = function onTooltipShow(event) {
 
             if (event && !tooltipElement.hasClass('active')) {
-              
+
               event.stopImmediatePropagation();
             }
 
@@ -359,7 +359,7 @@
                   smartPosition(tipElement, tooltipElement, $attrs.tooltipSide);
                   break;
                 }
-                
+
                 default: {
 
                   throw new Error('Position not supported');
@@ -466,7 +466,7 @@
           , onTooltipHide = function onTooltipHide(event) {
 
             if (event && tooltipElement.hasClass('active')) {
-  
+
               event.stopImmediatePropagation();
             }
 
@@ -479,66 +479,68 @@
             }
           }
           , registerOnScrollFrom = function registerOnScrollFrom(theElement) {
-            var parentElement = theElement.parent()
-              , timer;
-
-            if (theElement[0] &&
-              (theElement[0].scrollHeight > theElement[0].clientHeight ||
-              theElement[0].scrollWidth > theElement[0].clientWidth)) {
-
-              theElement.on('scroll', function onScroll() {
-                var that = this;
-
-                if (timer) {
-
-                  $timeout.cancel(timer);
-                }
-
-                timer = $timeout(function doLater() {
-
-                  var theTipElement = getAppendedTip(tooltipElement)
-                    , tooltipBoundingRect = tooltipElement[0].getBoundingClientRect()
-                    , thatBoundingRect = that.getBoundingClientRect();
-
-                  if (tooltipBoundingRect.top < thatBoundingRect.top ||
-                    tooltipBoundingRect.bottom > thatBoundingRect.bottom ||
-                    tooltipBoundingRect.left < thatBoundingRect.left ||
-                    tooltipBoundingRect.right > thatBoundingRect.right) {
-
-                    removeAppendedTip(tooltipElement);
-                  } else if (theTipElement) {
-
-                    onTooltipShow(true);
-                  }
-                });
-              });
-            }
-
-            if (parentElement &&
-              parentElement.length) {
-
-              registerOnScrollFrom(parentElement);
-            }
+            // // jwe - removed because of performance problems with many tooltips
+            //
+            // var parentElement = theElement.parent()
+            //   , timer;
+            //
+            // if (theElement[0] &&
+            //   (theElement[0].scrollHeight > theElement[0].clientHeight ||
+            //   theElement[0].scrollWidth > theElement[0].clientWidth)) {
+            //
+            //   theElement.on('scroll', function onScroll() {
+            //     var that = this;
+            //
+            //     if (timer) {
+            //
+            //       $timeout.cancel(timer);
+            //     }
+            //
+            //     timer = $timeout(function doLater() {
+            //
+            //       var theTipElement = getAppendedTip(tooltipElement)
+            //         , tooltipBoundingRect = tooltipElement[0].getBoundingClientRect()
+            //         , thatBoundingRect = that.getBoundingClientRect();
+            //
+            //       if (tooltipBoundingRect.top < thatBoundingRect.top ||
+            //         tooltipBoundingRect.bottom > thatBoundingRect.bottom ||
+            //         tooltipBoundingRect.left < thatBoundingRect.left ||
+            //         tooltipBoundingRect.right > thatBoundingRect.right) {
+            //
+            //         removeAppendedTip(tooltipElement);
+            //       } else if (theTipElement) {
+            //
+            //         onTooltipShow(true);
+            //       }
+            //     });
+            //   });
+            // }
+            //
+            // if (parentElement &&
+            //   parentElement.length) {
+            //
+            //   registerOnScrollFrom(parentElement);
+            // }
           }
           , showTemplate = function showTemplate(template) {
-          
+
             tooltipElement.removeClass('_force-hidden'); //see lines below, this forces to hide tooltip when is empty
             tipTipElement.empty();
             tipTipElement.append(closeButtonElement);
             tipTipElement.append(template);
             $timeout(function doLater() {
-              
+
               onTooltipShow();
             });
           }
           , hideTemplate = function hideTemplate() {
-          
+
             //hide tooltip because is empty
             tipTipElement.empty();
             tooltipElement.addClass('_force-hidden'); //force to be hidden if empty
           }
           , getTemplate = function getTemplate(tooltipTemplateUrl) {
-          
+
             var template = $templateCache.get(tooltipTemplateUrl);
 
             if (typeof template !== 'undefined') {
@@ -554,44 +556,44 @@
             });
           }
           , onTooltipTemplateChange = function onTooltipTemplateChange(newValue) {
-          
+
             if (newValue) {
-              
+
               showTemplate(newValue);
             } else {
-              
+
               hideTemplate();
             }
           }
           , onTooltipTemplateUrlChange = function onTooltipTemplateUrlChange(newValue) {
-          
+
             if (newValue && !$attrs.tooltipTemplateUrlCache) {
-              
+
               getTemplate(newValue).then(function onGetTemplateSuccess(template) {
-                
-                showTemplate($compile(template)(scope));
-              }).catch(function onGetTemplateFailure(reason) {
-                
-                $log.error(reason);
-              });
-            } else {
-              
-              hideTemplate();
-            }
-          }
-          , onTooltipTemplateUrlCacheChange = function onTooltipTemplateUrlCacheChange(newValue) {
-          
-            if (newValue && $attrs.tooltipTemplateUrl) {
-              
-              getTemplate($attrs.tooltipTemplateUrl).then(function onGetTemplateSuccess(template) {
-                
+
                 showTemplate($compile(template)(scope));
               }).catch(function onGetTemplateFailure(reason) {
 
                 $log.error(reason);
               });
             } else {
-              
+
+              hideTemplate();
+            }
+          }
+          , onTooltipTemplateUrlCacheChange = function onTooltipTemplateUrlCacheChange(newValue) {
+
+            if (newValue && $attrs.tooltipTemplateUrl) {
+
+              getTemplate($attrs.tooltipTemplateUrl).then(function onGetTemplateSuccess(template) {
+
+                showTemplate($compile(template)(scope));
+              }).catch(function onGetTemplateFailure(reason) {
+
+                $log.error(reason);
+              });
+            } else {
+
               hideTemplate();
             }
           }
