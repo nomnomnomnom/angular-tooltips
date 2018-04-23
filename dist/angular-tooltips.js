@@ -479,8 +479,7 @@
             }
           }
           , registerOnScrollFrom = function registerOnScrollFrom(theElement) {
-            // // jwe - removed because of performance problems with many tooltips
-            //
+            // jwe: slows performance
             // var parentElement = theElement.parent()
             //   , timer;
             //
@@ -528,10 +527,11 @@
             tipTipElement.empty();
             tipTipElement.append(closeButtonElement);
             tipTipElement.append(template);
-            $timeout(function doLater() {
-
-              onTooltipShow();
-            });
+            // jwe: slows performance
+            // $timeout(function doLater() {
+            //
+            //   onTooltipShow();
+            // });
           }
           , hideTemplate = function hideTemplate() {
 
@@ -771,12 +771,13 @@
         resizeObserver.add(function registerResize() {
 
           calculateIfMultiLine();
-          onTooltipShow();
+          // jwe: slows performance
+          // onTooltipShow();
         });
 
         $timeout(function doLater() {
-
-          onTooltipShow();
+          // jwe: slows performance
+          // onTooltipShow();
           tipElement.removeClass('_hidden');
           tooltipElement.addClass('_ready');
         });
