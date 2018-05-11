@@ -6,7 +6,7 @@
  * http://720kb.github.io/angular-tooltips
  * 
  * MIT license
- * Sun Apr 22 2018
+ * Fri May 11 2018
  */
 /*global angular,window*/
 (function withAngular(angular, window) {
@@ -221,8 +221,7 @@
       return '_' + side;
     }).join(' ');
   }
-  , directions = ['_top', '_top _left', '_left', '_bottom _left', '_bottom', '_bottom _right', '_right', '_top _right']
-  , smartPosition = function smartPosition(tipElement, tooltipElement, startSide) {
+  , smartPosition = function smartPosition(tipElement, tooltipElement, startSide, directions) {
 
     var directionsIndex = directions.indexOf(getSideClasses(startSide))
       , directionsLength = directions.length
@@ -236,7 +235,7 @@
         directionsIndex = 0;
       }
       tooltipElement.removeClass('_top _left _bottom _right');
-      tooltipElement.addClass(directions[directionsIndex]);
+      tooltipElement.addClass(getSideClasses(directions[directionsIndex]));
     }
   }
   , tooltipConfigurationProvider = function tooltipConfigurationProvider() {
@@ -251,7 +250,8 @@
       'size': '',
       'speed': 'steady',
       'tooltipTemplateUrlCache': false,
-      'show': null
+      'show': null,
+      'directions': ['top', 'top left', 'left', 'bottom left', 'bottom', 'bottom right', 'right', 'top right']
     };
 
     return {
@@ -312,6 +312,7 @@
       $attrs.tooltipSize = $attrs.tooltipSize || tooltipsConf.size;
       $attrs.tooltipSpeed = $attrs.tooltipSpeed || tooltipsConf.speed;
       $attrs.tooltipAppendToBody = $attrs.tooltipAppendToBody === 'true';
+      $attrs.directions = $attrs.directions ? $attrs.directions.split(',') : tooltipsConf.directions;
 
       $transcludeFunc($scope, function onTransclusionDone(element, scope) {
         var attributes = getAttributesToAdd(element)
@@ -345,25 +346,10 @@
 
             tipElement.addClass('_hidden');
             if ($attrs.tooltipSmart) {
-
-              switch ($attrs.tooltipSide) {
-                case 'top':
-                case 'left':
-                case 'bottom':
-                case 'right':
-                case 'top left':
-                case 'top right':
-                case 'bottom left':
-                case 'bottom right': {
-
-                  smartPosition(tipElement, tooltipElement, $attrs.tooltipSide);
-                  break;
-                }
-
-                default: {
-
-                  throw new Error('Position not supported');
-                }
+              if ($attrs.directions.includes($attrs.tooltipSide)) {
+                smartPosition(tipElement, tooltipElement, $attrs.tooltipSide, $attrs.directions);
+              } else {
+                throw new Error('Position not supported');
               }
             }
 
@@ -478,60 +464,12 @@
               tooltipElement.removeClass('active');
             }
           }
-          , registerOnScrollFrom = function registerOnScrollFrom(theElement) {
-            // jwe: slows performance
-            // var parentElement = theElement.parent()
-            //   , timer;
-            //
-            // if (theElement[0] &&
-            //   (theElement[0].scrollHeight > theElement[0].clientHeight ||
-            //   theElement[0].scrollWidth > theElement[0].clientWidth)) {
-            //
-            //   theElement.on('scroll', function onScroll() {
-            //     var that = this;
-            //
-            //     if (timer) {
-            //
-            //       $timeout.cancel(timer);
-            //     }
-            //
-            //     timer = $timeout(function doLater() {
-            //
-            //       var theTipElement = getAppendedTip(tooltipElement)
-            //         , tooltipBoundingRect = tooltipElement[0].getBoundingClientRect()
-            //         , thatBoundingRect = that.getBoundingClientRect();
-            //
-            //       if (tooltipBoundingRect.top < thatBoundingRect.top ||
-            //         tooltipBoundingRect.bottom > thatBoundingRect.bottom ||
-            //         tooltipBoundingRect.left < thatBoundingRect.left ||
-            //         tooltipBoundingRect.right > thatBoundingRect.right) {
-            //
-            //         removeAppendedTip(tooltipElement);
-            //       } else if (theTipElement) {
-            //
-            //         onTooltipShow(true);
-            //       }
-            //     });
-            //   });
-            // }
-            //
-            // if (parentElement &&
-            //   parentElement.length) {
-            //
-            //   registerOnScrollFrom(parentElement);
-            // }
-          }
           , showTemplate = function showTemplate(template) {
 
             tooltipElement.removeClass('_force-hidden'); //see lines below, this forces to hide tooltip when is empty
             tipTipElement.empty();
             tipTipElement.append(closeButtonElement);
             tipTipElement.append(template);
-            // jwe: slows performance
-            // $timeout(function doLater() {
-            //
-            //   onTooltipShow();
-            // });
           }
           , hideTemplate = function hideTemplate() {
 
@@ -759,25 +697,11 @@
         tooltipElement.append(tipElement);
         $element.after(tooltipElement);
 
-        if ($attrs.tooltipAppendToBody) {
-
-          resizeObserver.add(function onResize() {
-
-            registerOnScrollFrom(tooltipElement);
-          });
-          registerOnScrollFrom(tooltipElement);
-        }
-
         resizeObserver.add(function registerResize() {
-
           calculateIfMultiLine();
-          // jwe: slows performance
-          // onTooltipShow();
         });
 
         $timeout(function doLater() {
-          // jwe: slows performance
-          // onTooltipShow();
           tipElement.removeClass('_hidden');
           tooltipElement.addClass('_ready');
         });
