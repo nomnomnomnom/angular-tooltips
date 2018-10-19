@@ -1,13 +1,3 @@
-/*
- * angular-tooltips
- * 1.2.2
- * 
- * Angular.js tooltips module.
- * http://720kb.github.io/angular-tooltips
- * 
- * MIT license
- * Fri May 11 2018
- */
 /*global angular,window*/
 (function withAngular(angular, window) {
   'use strict';
@@ -375,6 +365,8 @@
                 , paddingLeftValue
                 , paddingRightValue;
 
+              exradicatedTipElement.html($compile(tipTipElement.template)(scope));
+
               tipElement.removeClass('_hidden');
               exradicatedTipElement.removeClass('_hidden');
               exradicatedTipElement.data('_tooltip-parent', tooltipElement);
@@ -470,6 +462,7 @@
             tipTipElement.empty();
             tipTipElement.append(closeButtonElement);
             tipTipElement.append(template);
+            tipTipElement.template = template;
           }
           , hideTemplate = function hideTemplate() {
 
