@@ -349,7 +349,7 @@
                 , tipArrowElementStyle = getStyle(tipArrowElement[0])
                 , tipElementStyle = getStyle(tipElement[0])
                 , tipElementBoundingClientRect = tipElement[0].getBoundingClientRect()
-                , exradicatedTipElement = angular.element(angular.copy(tipElement[0]))
+                , exradicatedTipElement = $compile(angular.copy(tipElement))(scope)
                 , tipTipStyleIndex = 0
                 , tipTipStyleLength = tipTipElementStyle.length
                 , tipArrowStyleIndex = 0
@@ -364,8 +364,6 @@
                 , paddingBottomValue
                 , paddingLeftValue
                 , paddingRightValue;
-
-              exradicatedTipElement.find('tiptip > .close-button + *').html($compile(angular.copy(tipTipElement.template))(scope));
 
               tipElement.removeClass('_hidden');
               exradicatedTipElement.removeClass('_hidden');
@@ -462,7 +460,6 @@
             tipTipElement.empty();
             tipTipElement.append(closeButtonElement);
             tipTipElement.append(template);
-            tipTipElement.template = template;
           }
           , hideTemplate = function hideTemplate() {
 
